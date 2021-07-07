@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class MainService implements CommandLineRunner {
 
-    private Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner;
     private final Command command;
 
     @Override

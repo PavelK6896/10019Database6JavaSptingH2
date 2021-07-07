@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.Set;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -13,20 +12,23 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = {"id", "name"})
-@Table(schema = "test_1", name = "car")
-public class Car {
+@EqualsAndHashCode(of = {"id", "value"})
+@Table(schema = "test_1", name = "property_two")
+public class PropertyTwo {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @Column(name = "name")
-    private String name;
+    private Long value;
 
-    @OneToMany(mappedBy = "car", cascade = CascadeType.PERSIST)
+    @Column(name = "id_action", insertable = false, updatable = false)
+    private Long idAction;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_action")
     @ToString.Exclude
     @JsonBackReference
-    private Set<Area> areas;
+    private ActionTwo actionTwo;
 
 }

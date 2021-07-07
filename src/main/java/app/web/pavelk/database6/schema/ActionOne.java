@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
 import javax.persistence.*;
-
 import java.util.Set;
 
 import static javax.persistence.GenerationType.IDENTITY;
@@ -14,24 +13,24 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = {"id", "code"})
-@Table(schema = "test_1", name = "area")
-public class Area {
+@EqualsAndHashCode(of = {"id", "numberAction"})
+@Table(schema = "test_1", name = "action_one")
+public class ActionOne {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @Column(name = "code")
-    private Long code;
+    @Column(name = "number_action")
+    private Long numberAction;
 
-    @Column(name = "id_car")
-    private Long idCar;
+    @Column(name = "id_area", insertable = false, updatable = false)
+    private Long idArea;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_car",  insertable = false, updatable = false)
+    @JoinColumn(name = "id_area")
     @ToString.Exclude
     @JsonBackReference
-    private Car car;
+    private Area area;
 
     @Column(name = "id_type", insertable = false, updatable = false)
     private Long idType;
@@ -41,10 +40,9 @@ public class Area {
     @JsonBackReference
     private TypeObject typeObject;
 
+    @OneToMany(mappedBy = "actionOne")
     @ToString.Exclude
     @JsonBackReference
-    @OneToMany(mappedBy = "area", cascade = CascadeType.ALL)
-    private Set<ActionOne> actionOnes;
-
+    private Set<PropertyOne> propertyOne;
 
 }

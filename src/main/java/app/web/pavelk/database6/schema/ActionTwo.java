@@ -13,20 +13,20 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = {"id", "name"})
-@Table(schema = "test_1", name = "car")
-public class Car {
+@EqualsAndHashCode(of = {"id", "numberAction"})
+@Table(schema = "test_1", name = "action_two")
+public class ActionTwo {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "number_action")
+    private Long numberAction;
 
-    @OneToMany(mappedBy = "car", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "actionTwo")
     @ToString.Exclude
     @JsonBackReference
-    private Set<Area> areas;
+    private Set<PropertyTwo> propertyTwo;
 
 }

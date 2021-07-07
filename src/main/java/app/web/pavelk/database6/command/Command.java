@@ -10,16 +10,15 @@ import app.web.pavelk.database6.schema.Area;
 import app.web.pavelk.database6.schema.Car;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
@@ -34,11 +33,37 @@ public class Command {
     private final ShowAreaCar showAreaCar;
     private final ShowCarArea showCarArea;
     private final UpdateCar1 updateCar1;
-
+    private final Map<String, JpaRepository<?, Long>> jpaMap;
+    private final Scanner scanner;
     Map<String, Execute> map = new HashMap<>();
 
     private void put(Execute e, List<String> l) {
         l.forEach(f -> map.put(f, e));
+    }
+
+    @PostConstruct
+    private void generateDefault() {
+        jpaMap.forEach((key, value) -> {
+            map.put(key.substring(0, (key.length() - 4)), () -> {
+                System.out.println(key);
+                var next = scanner.next();
+                if (next.equals("s")) {
+                    System.out.println("s");
+                    next = scanner.next();
+                    if (next.equals("a")) {
+                        value.findAll().forEach(System.out::println);
+                    } else {
+                        System.out.println(value.findById(Long.valueOf(next)).orElse(null));
+                    }
+                } else if (next.equals("i")) {
+
+                } else if (next.equals("u")) {
+
+                } else if (next.equals("d")) {
+
+                }
+            });
+        });
     }
 
     public Map<String, Execute> generate() {
@@ -104,6 +129,7 @@ public class Command {
             }
 
         }, List.of("8", "update car in area"));
+
 
 
 //        put(() -> {
