@@ -6,6 +6,7 @@ import app.web.pavelk.database6.command.body.ShowCarArea;
 import app.web.pavelk.database6.command.body.UpdateCar1;
 import app.web.pavelk.database6.repo.AreaRepo;
 import app.web.pavelk.database6.repo.CarRepo;
+import app.web.pavelk.database6.schema.ActionOne;
 import app.web.pavelk.database6.schema.Area;
 import app.web.pavelk.database6.schema.Car;
 import lombok.Getter;
@@ -18,6 +19,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,12 +40,14 @@ public class Command {
     private final Scanner scanner;
     Map<String, Execute> map = new HashMap<>();
 
+
     private void put(Execute e, List<String> l) {
         l.forEach(f -> map.put(f, e));
     }
 
     @PostConstruct
     private void generateDefault() {
+
         jpaMap.forEach((key, value) -> {
             map.put(key.substring(0, (key.length() - 4)), () -> {
                 System.out.println(key);
@@ -55,8 +60,48 @@ public class Command {
                     } else {
                         System.out.println(value.findById(Long.valueOf(next)).orElse(null));
                     }
-                } else if (next.equals("i")) {
+                } else if (next.equals("1")) {
+                    try {
+                        var aPackage = ActionOne.class.getPackageName();
+                        var listTable = Files.list(Path.of("src/main/java/app/web/pavelk/database6/schema"))
+                                .map(m -> {
+                                    var s = m.getFileName().toString();
+                                    return s.substring(0, s.length() - 5);
+                                }).collect(Collectors.toList());
 
+                        for (String table : listTable) {
+                            if (table.equalsIgnoreCase(key.substring(0, key.length() - 4))) {
+                                var fullClass = aPackage + "." + table;
+                                System.out.println(fullClass);
+                                Class<?> aClass = Class.forName(fullClass);
+                                Object o = aClass.getConstructor().newInstance();
+                                Arrays.asList(o.getClass().getDeclaredFields())
+                                        .forEach(f -> {
+                                            var genericType = f.getType();
+                                            var nextField = scanner.next();
+                                            System.out.println(": " + nextField);
+                                            Object object1 = null;
+                                            if (f.getType().equals(Long.class)) {
+                                                object1 = Long.valueOf(nextField);
+                                            } else if (f.getType().equals(String.class)) {
+                                                object1 = nextField;
+                                            }
+                                            try {
+                                                f.setAccessible(true);
+                                                f.set(o, object1);
+                                            } catch (IllegalAccessException e) {
+                                                e.printStackTrace();
+                                            }
+                                        });
+                                Object cast = aClass.getNestHost().cast(o);
+//                                value.save(cast);
+                            }
+                        }
+
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 } else if (next.equals("u")) {
 
                 } else if (next.equals("d")) {
@@ -72,7 +117,7 @@ public class Command {
             public void execute() {
                 carRepo.findAll().forEach(System.out::println);
             }
-        }, List.of("1", "show car"));
+        }, List.of("111", "show car"));
 
         put(() -> areaRepo.findAll().forEach(System.out::println), List.of("2", "show area"));
         put(showAreaCar, List.of("3", "show are in car"));
@@ -129,7 +174,6 @@ public class Command {
             }
 
         }, List.of("8", "update car in area"));
-
 
 
 //        put(() -> {
