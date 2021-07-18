@@ -36,20 +36,23 @@ public class Command {
     private final ShowAreaCar showAreaCar;
     private final ShowCarArea showCarArea;
     private final UpdateCar1 updateCar1;
-    private final Map<String, JpaRepository<?, Long>> jpaMap;
+    private final Map<String, JpaRepository<?, ?>> jpaMap;
     private final Scanner scanner;
-    Map<String, Execute> map = new HashMap<>();
+    Map<String, CommandDecor> map = new HashMap<>();
 
+    private void put(List<String> l, Execute e) {
+        l.forEach(f -> map.put(f, CommandDecor.builder().execute(e).build()));
+    }
 
-    private void put(Execute e, List<String> l) {
-        l.forEach(f -> map.put(f, e));
+    private void put(String description, List<String> l, Execute e) {
+        l.forEach(f -> map.put(f, CommandDecor.builder().description(description).execute(e).build()));
     }
 
     @PostConstruct
     private void generateDefault() {
 
         jpaMap.forEach((key, value) -> {
-            map.put(key.substring(0, (key.length() - 4)), () -> {
+            map.put(key.substring(0, (key.length() - 4)), CommandDecor.builder().execute(() -> {
                 System.out.println(key);
                 var next = scanner.next();
                 if (next.equals("s")) {
@@ -58,9 +61,10 @@ public class Command {
                     if (next.equals("a")) {
                         value.findAll().forEach(System.out::println);
                     } else {
-                        System.out.println(value.findById(Long.valueOf(next)).orElse(null));
+                        var value1 = (JpaRepository<Object, Object>) value;
+                        System.out.println(value1.findById(Long.valueOf(next)).orElse(null));
                     }
-                } else if (next.equals("1")) {
+                } else if (next.equals("i")) {
                     try {
                         var aPackage = ActionOne.class.getPackageName();
                         var listTable = Files.list(Path.of("src/main/java/app/web/pavelk/database6/schema"))
@@ -93,11 +97,10 @@ public class Command {
                                                 e.printStackTrace();
                                             }
                                         });
-                                Object cast = aClass.getNestHost().cast(o);
-//                                value.save(cast);
+                                var value1 = (JpaRepository<Object, Object>) value;
+                                value1.saveAndFlush(o);
                             }
                         }
-
 
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -107,24 +110,24 @@ public class Command {
                 } else if (next.equals("d")) {
 
                 }
-            });
+            }).build());
         });
     }
 
-    public Map<String, Execute> generate() {
-        put(new Execute() {
+    public Map<String, CommandDecor> generate() {
+        put(List.of("111", "show car"), new Execute() {
             @Override
             public void execute() {
                 carRepo.findAll().forEach(System.out::println);
             }
-        }, List.of("111", "show car"));
+        });
 
-        put(() -> areaRepo.findAll().forEach(System.out::println), List.of("2", "show area"));
-        put(showAreaCar, List.of("3", "show are in car"));
-        put(showCarArea, List.of("4", "show car in area"));
-        put(updateCar1, List.of("4", "show car in area"));
+        put(List.of("2", "show area"), () -> areaRepo.findAll().forEach(System.out::println));
+        put(List.of("3", "show are in car"), showAreaCar);
+        put(List.of("4", "show car in area"), showCarArea);
+        put(List.of("4", "show car in area"), updateCar1);
 
-        put(() -> {
+        put(List.of("5", "create car"), () -> {
             PlatformTransactionManager transactionManager = transactionTemplate.getTransactionManager();
             if (transactionManager == null) throw new AssertionError();
             TransactionStatus transactionStatus = transactionManager.getTransaction(transactionTemplate);
@@ -135,11 +138,11 @@ public class Command {
             carRepo.saveAndFlush(aNew);
             transactionManager.commit(transactionStatus);
 
-        }, List.of("5", "create car"));
+        });
 
-        put(updateCar1, List.of("6", "update are in car"));
+        put(List.of("6", "update are in car"), updateCar1);
 
-        put(() -> {
+        put(List.of("7", "show area code in car"), () -> {
             System.out.println(transactionTemplate.getIsolationLevel());
             System.out.println(transactionTemplate.getPropagationBehavior());
             PlatformTransactionManager transactionManager = transactionTemplate.getTransactionManager();
@@ -152,9 +155,9 @@ public class Command {
                 return m.getId();
             }).collect(Collectors.toList());
             transactionManager.commit(transactionStatus);
-        }, List.of("7", "show area code in car"));
+        });
 
-        put(() -> {
+        put("update car in area", List.of("8", "update car in area"), () -> {
             PlatformTransactionManager transactionManager = transactionTemplate.getTransactionManager();
             if (transactionManager == null) throw new AssertionError();
             TransactionStatus transactionStatus = transactionManager.getTransaction(transactionTemplate);
@@ -173,12 +176,15 @@ public class Command {
                 System.out.println(e.getMessage());
             }
 
-        }, List.of("8", "update car in area"));
+        });
 
-
-//        put(() -> {
-//
-//        }, List.of("8", "update car"));
+        put("help", List.of("help", "h"), () -> {
+            map.entrySet().forEach(e -> {
+                {
+                    System.out.println(e.getKey() + " " + e.getValue().getDescription());
+                }
+            });
+        });
 
 
         return map;

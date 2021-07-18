@@ -2,6 +2,7 @@ package app.web.pavelk.database6.service;
 
 
 import app.web.pavelk.database6.command.Command;
+import app.web.pavelk.database6.command.CommandDecor;
 import app.web.pavelk.database6.command.Execute;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -21,11 +22,11 @@ public class MainService implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        Map<String, Execute> generate = command.generate();
+        Map<String, CommandDecor> generate = command.generate();
         while (true) {
             TimeUnit.MILLISECONDS.sleep(500);
             String next = scanner.next();
-            Execute execute = generate.get(next);
+            Execute execute = generate.get(next).getExecute();
             if (execute != null) {
                 execute.execute();
             }
