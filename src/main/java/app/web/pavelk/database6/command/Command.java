@@ -48,11 +48,18 @@ public class Command {
         l.forEach(f -> map.put(f, CommandDecor.builder().description(description).execute(e).build()));
     }
 
+    private void put(Long id, String description, List<String> l, Execute e) {
+        l.forEach(f -> map.put(f, CommandDecor.builder().id(id).key(f).description(description).execute(e).build()));
+    }
+
     @PostConstruct
     private void generateDefault() {
 
-        jpaMap.forEach((key, value) -> {
-            map.put(key.substring(0, (key.length() - 4)), CommandDecor.builder().execute(() -> {
+        long id = 100L;
+        for (Map.Entry<String, JpaRepository<?, ?>> entry : jpaMap.entrySet()) {
+            String key = entry.getKey();
+            JpaRepository<?, ?> value = entry.getValue();
+            put(id++, key, List.of(key.substring(0, (key.length() - 4))), () -> {
                 System.out.println(key);
                 var next = scanner.next();
                 if (next.equals("s")) {
@@ -110,12 +117,12 @@ public class Command {
                 } else if (next.equals("d")) {
 
                 }
-            }).build());
-        });
+            });
+        }
     }
 
     public Map<String, CommandDecor> generate() {
-        put(List.of("111", "show car"), new Execute() {
+        put(11L, "show car", List.of("c", "car"), new Execute() {
             @Override
             public void execute() {
                 carRepo.findAll().forEach(System.out::println);
@@ -178,12 +185,18 @@ public class Command {
 
         });
 
-        put("help", List.of("help", "h"), () -> {
-            map.entrySet().forEach(e -> {
-                {
-                    System.out.println(e.getKey() + " " + e.getValue().getDescription());
-                }
-            });
+        put(1L, "help", List.of("help", "h"), () -> {
+            Map<Long, List<CommandDecor>> collect = map.values()
+                    .stream()
+                    .filter(f -> f.getId() != null)
+                    .collect(Collectors.groupingBy(CommandDecor::getId));
+            collect
+                    .entrySet()
+                    .forEach(f -> System.out
+                            .println(f.getValue().stream()
+                                    .map(m -> m.getKey()).collect(Collectors.joining(", ")) + " = " +
+                                    f.getValue().stream()
+                                            .map(m -> m.getDescription()).distinct().collect(Collectors.joining(" "))));
         });
 
 

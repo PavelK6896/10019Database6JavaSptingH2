@@ -8,6 +8,8 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 public class CommandDecor {
+    Long id;
+    String key;
     String info;
     String description;
     Execute execute;
