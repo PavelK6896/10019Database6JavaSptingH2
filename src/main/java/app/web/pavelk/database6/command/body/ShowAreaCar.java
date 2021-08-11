@@ -4,7 +4,6 @@ import app.web.pavelk.database6.command.Execute;
 import app.web.pavelk.database6.repo.CarRepo;
 import app.web.pavelk.database6.schema.Car;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -55,11 +55,18 @@ public class Command {
     @PostConstruct
     private void generateDefault() {
 
-        long id = 100L;
+        long id = 10L;
         for (Map.Entry<String, JpaRepository<?, ?>> entry : jpaMap.entrySet()) {
             String key = entry.getKey();
             JpaRepository<?, ?> value = entry.getValue();
-            put(id++, key, List.of(key.substring(0, (key.length() - 4))), () -> {
+
+            id++;
+
+            put(id, key, List.of(key.substring(0, 1) + id), () -> {
+                value.findAll().forEach(System.out::println);
+            });
+
+            put(id, key, List.of(key.substring(0, (key.length() - 4))), () -> {
                 System.out.println(key);
                 var next = scanner.next();
                 if (next.equals("s")) {
@@ -122,14 +129,14 @@ public class Command {
     }
 
     public Map<String, CommandDecor> generate() {
-        put(11L, "show car", List.of("c", "car"), new Execute() {
+        put(104L, "show car", List.of("c1", "car"), new Execute() {
             @Override
             public void execute() {
                 carRepo.findAll().forEach(System.out::println);
             }
         });
 
-        put(List.of("2", "show area"), () -> areaRepo.findAll().forEach(System.out::println));
+        put(105L, "show area", List.of("2", "show area"), () -> areaRepo.findAll().forEach(System.out::println));
         put(List.of("3", "show are in car"), showAreaCar);
         put(List.of("4", "show car in area"), showCarArea);
         put(List.of("4", "show car in area"), updateCar1);
@@ -190,13 +197,11 @@ public class Command {
                     .stream()
                     .filter(f -> f.getId() != null)
                     .collect(Collectors.groupingBy(CommandDecor::getId));
-            collect
-                    .entrySet()
-                    .forEach(f -> System.out
-                            .println(f.getValue().stream()
-                                    .map(m -> m.getKey()).collect(Collectors.joining(", ")) + " = " +
-                                    f.getValue().stream()
-                                            .map(m -> m.getDescription()).distinct().collect(Collectors.joining(" "))));
+            collect.entrySet()
+                    .forEach(f -> System.out.println(f.getValue().stream().map(m -> m.getKey()).collect(Collectors.joining(", ")) + " = " +
+                            f.getValue().stream().map(m -> m.getDescription()).distinct().collect(Collectors.joining(" "))));
+
+            System.out.println();
         });
 
 

@@ -26,10 +26,15 @@ public class MainService implements CommandLineRunner {
         while (true) {
             TimeUnit.MILLISECONDS.sleep(500);
             String next = scanner.next();
-            Execute execute = generate.get(next).getExecute();
+            if (next.equals("exit")) {
+                System.exit(0);
+                break;
+            }
+            Execute execute = generate.getOrDefault(next, generate.get("help")).getExecute();
             if (execute != null) {
                 execute.execute();
             }
+
         }
     }
 }
