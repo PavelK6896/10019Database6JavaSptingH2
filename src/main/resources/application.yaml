@@ -8,14 +8,15 @@ spring:
       path: /h2
 
   datasource:
-    url: jdbc:h2:mem:memDb;DB_CLOSE_DELAY=-1
+#    url: jdbc:h2:mem:memDb;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:file:./data/db6
     driverClassName: org.h2.Driver
     username: sa
     password:
 
   sql:
     init:
-      mode: embedded
+      mode: always
       schema-locations: classpath:db/schema.sql
       data-locations: classpath:db/data.sql
 
